@@ -20,7 +20,7 @@ class SlotsButtons extends Component
 
     public function cashOut() 
     {
-        //
+        // TODO: Implement cashOut method
     }
 
     public function spin() 
