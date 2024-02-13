@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\CreateAnonymousUserOnNewSession;
 use App\Livewire\Pages\Welcome;
 use Illuminate\Support\Facades\Route;
 
@@ -14,4 +15,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', Welcome::class)->name('welcome');
+Route::middleware([CreateAnonymousUserOnNewSession::class])->group(function () {
+    Route::get('/', Welcome::class)->name('welcome');
+});
