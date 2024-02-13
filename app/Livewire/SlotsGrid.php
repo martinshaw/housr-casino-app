@@ -16,7 +16,10 @@ class SlotsGrid extends Component
     public function mount()
     {
         $latestSpin = app(SlotSymbolRepository::class)->getCurrentUsersLatestSpin();
-        if (is_null($latestSpin)) $this->randomizeSlotBoxSymbols();
+        if (is_null($latestSpin)) {
+            $this->randomizeSlotBoxSymbols();
+            return;
+        }
 
         $this->slotSymbolA = $this->convertSymbolNameToSymbol($latestSpin->slot_symbols[0]);
         $this->slotSymbolB = $this->convertSymbolNameToSymbol($latestSpin->slot_symbols[1]);
