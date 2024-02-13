@@ -24,7 +24,7 @@ class CreateAnonymousUserOnNewSession
         ]);
 
         $newUser->creditAllocations()->create([
-            'quantity_allocated' => config('casino.credit_allocation_quantity.on_new_anonymous_user', 0),
+            'quantity_allocated' => config('casino.credit_allocation_quantity.gain_on_new_anonymous_user', 0),
         ]);
 
         Auth::login($newUser, false);

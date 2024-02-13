@@ -25,4 +25,33 @@ class UserCreditAllocationRepository
 
         return $creditCount;
     }
+
+    public function chargeCredits(int $creditsQuantity = 0): int | false
+    {
+        $currentUserCreditsCount = $this->getCurrentUserCreditsCount();
+        if ($currentUserCreditsCount < $creditsQuantity) return false;
+
+        $user = Auth::user();
+        if (is_null($user)) return false;
+
+        $remainingToBeCharged = $creditsQuantity;
+
+        $creditAllocations = $user->creditAllocations()->get();
+
+        foreach ($creditAllocations as $creditAllocation) {
+            if (($creditAllocation->quantity_allocated - $creditAllocation->quantity_used) >= $remainingToBeCharged) {
+                $creditAllocation->quantity_used += $remainingToBeCharged;
+                $creditAllocation->save();
+                return $creditsQuantity;
+            }
+
+            $remainingToBeCharged -= ($creditAllocation->quantity_allocated - $creditAllocation->quantity_used);
+            $creditAllocation->quantity_used = $creditAllocation->quantity_allocated;
+            $creditAllocation->save();
+        }
+
+        if ($remainingToBeCharged > 0) return false;
+
+        return $creditsQuantity;
+    }
 }

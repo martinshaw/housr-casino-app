@@ -2,10 +2,11 @@
 
 return [
     'credit_allocation_quantity' => [
-        'on_new_anonymous_user' => 10,
-        'on_win_with_cherry' => 10,
-        'on_win_with_lemon' => 20,
-        'on_win_with_orange' => 30,
-        'on_win_with_watermelon' => 40,
+        'cost_of_spin' => 1,
+        'gain_on_new_anonymous_user' => 10,
+        'gain_on_win_with_cherry' => 10,
+        'gain_on_win_with_lemon' => 20,
+        'gain_on_win_with_orange' => 30,
+        'gain_on_win_with_watermelon' => 40,
     ],
 ];
