@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\UserSlotsSpin;
+use Illuminate\Support\Facades\Auth;
 
 enum SlotSymbol: string {
     case Cherry = '🍒';
@@ -13,6 +14,20 @@ enum SlotSymbol: string {
 
 class SlotSymbolRepository
 {
+    private function slotSymbolsWin(array $slotSymbols): int
+    {
+        $uniqueSlotSymbolsCount = count(array_unique(array_map(fn ($symbol) => $symbol->name, $slotSymbols)));
+        
+        if ($uniqueSlotSymbolsCount !== 1) return 0;
+
+        $slotSymbol = $slotSymbols[0]->name;
+
+        if ($slotSymbol === SlotSymbol::Cherry) return config('casino.credit_allocation_quantity.gain_on_win_with_cherry', 0);
+        if ($slotSymbol === SlotSymbol::Lemon) return config('casino.credit_allocation_quantity.gain_on_win_with_lemon', 0);
+        if ($slotSymbol === SlotSymbol::Orange) return config('casino.credit_allocation_quantity.gain_on_win_with_orange', 0);
+        if ($slotSymbol === SlotSymbol::Watermelon) return config('casino.credit_allocation_quantity.gain_on_win_with_watermelon', 0);
+    }
+
     public function nextSpin(): UserSlotsSpin | false
     {
         $userCreditAllocationRepository = app(UserCreditAllocationRepository::class);
@@ -24,37 +39,58 @@ class SlotSymbolRepository
         if ($creditsQuantityBet === false) return false;
 
         $currentUserCreditsCount = $userCreditAllocationRepository->getCurrentUserCreditsCount();
+
+        $previousWinsCount = UserSlotsSpin::query()
+            ->where('user_id', Auth::id())
+            ->where('credits_quantity_won', '>', 0)
+            ->count();
         
         $slotSymbols = null;
 
         if ($currentUserCreditsCount < 40) $slotSymbols = $this->getSetOfSlotSymbols();
 
         else if ($currentUserCreditsCount >= 40 && $currentUserCreditsCount < 60) {
-            //
+            $chance = $previousWinsCount * 0.3;
+            $slotSymbols = $this->getSetOfSlotSymbols(biasAgainstMatching: $chance);
+            if ($this->slotSymbolsWin($slotSymbols) > 0) $slotSymbols = $this->getSetOfSlotSymbols(biasAgainstMatching: $chance);
         }
+
+        else if ($currentUserCreditsCount >= 60) {                
+            $chance = $previousWinsCount * 0.6;
+            $slotSymbols = $this->getSetOfSlotSymbols(biasAgainstMatching: $chance);
+            if ($this->slotSymbolsWin($slotSymbols) > 0) $slotSymbols = $this->getSetOfSlotSymbols(biasAgainstMatching: $chance);
+        }
+
+        $creditsQuantityWon = $this->slotSymbolsWin($slotSymbols);
+
+        $userSlotsSpin = Auth::user()->slotsSpins()->create([
+            'slot_symbols' => $slotSymbols,
+            'credits_quantity_won' => $creditsQuantityWon,
+            'credits_quantity_bet' => $creditsQuantityBet,
+        ]);
+
+        return $userSlotsSpin;
     }
 
     public function getSetOfSlotSymbols(
-        float $biasTowardMatching = 0,
+        float $biasAgainstMatching = 0,
         bool $withNoneMatching = false
     ): array
     {
-        $matchableSymbol = $this->getRandomSlotSymbol();
-        
-        $chanceSymbolShouldMatch = fn () => mt_rand(0, 100) <= ($biasTowardMatching * 100);
-
         $symbols = [
-            $chanceSymbolShouldMatch() ? $matchableSymbol : $this->getRandomSlotSymbol(),
-            $chanceSymbolShouldMatch() ? $matchableSymbol : $this->getRandomSlotSymbol(),
-            $chanceSymbolShouldMatch() ? $matchableSymbol : $this->getRandomSlotSymbol(),
-            $chanceSymbolShouldMatch() ? $matchableSymbol : $this->getRandomSlotSymbol(),
+            $this->getRandomSlotSymbol(),
+            $this->getRandomSlotSymbol(),
+            $this->getRandomSlotSymbol(),
+            $this->getRandomSlotSymbol(),
         ];
-
+        
+        $chanceSymbolShouldNotMatch = mt_rand(0, 100) <= ($biasAgainstMatching * 100);
+        
         $symbolsAreNotUnique = count(array_unique(array_map(fn ($symbol) => $symbol->name, $symbols))) !== 4;
-        if ($withNoneMatching && $symbolsAreNotUnique) 
+        if (($withNoneMatching || $chanceSymbolShouldNotMatch) && $symbolsAreNotUnique) 
             return $this->getSetOfSlotSymbols(
-                $biasTowardMatching,
-                $withNoneMatching,
+                $biasAgainstMatching,
+                true
             );
 
         return $symbols;

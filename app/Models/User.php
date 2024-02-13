@@ -47,4 +47,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserCreditAllocation::class);
     }
+
+    public function slotsSpins()
+    {
+        return $this->hasMany(UserSlotsSpin::class);
+    }
 }
