@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Middleware\CreateAnonymousUserOnNewSession;
-use App\Livewire\Pages\Welcome;
+use App\Livewire\Pages\Slots;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,5 +16,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware([CreateAnonymousUserOnNewSession::class])->group(function () {
-    Route::get('/', Welcome::class)->name('welcome');
+    Route::get('/', fn () => redirect()->to(route('slots')))->name('welcome');
+
+    Route::get('/slots', Slots::class)->name('slots');
 });
