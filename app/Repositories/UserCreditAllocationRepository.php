@@ -54,4 +54,18 @@ class UserCreditAllocationRepository
 
         return $creditsQuantity;
     }
+
+    public function depositCredits(int $creditsQuantity = 0): int
+    {
+        $user = Auth::user();
+        if (is_null($user)) return 0;
+
+        $creditAllocation = new UserCreditAllocation();
+        $creditAllocation->quantity_allocated = $creditsQuantity;
+        $creditAllocation->quantity_used = 0;
+
+        $user->creditAllocations()->save($creditAllocation);
+
+        return $creditsQuantity;
+    }
 }

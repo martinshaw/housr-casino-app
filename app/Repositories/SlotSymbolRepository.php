@@ -76,6 +76,8 @@ class SlotSymbolRepository
             'credits_quantity_bet' => $creditsQuantityBet,
         ]);
 
+        if ($creditsQuantityWon > 0) $userCreditAllocationRepository->depositCredits($creditsQuantityWon);
+
         return $userSlotsSpin;
     }
 
