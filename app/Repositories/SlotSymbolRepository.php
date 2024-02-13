@@ -11,17 +11,46 @@ enum SlotSymbol: string {
 
 class SlotSymbolRepository
 {
-    public function getSetOfTruelyRandomSlotSymbols(): array
+    public function getSetOfSlotSymbols(
+        SlotSymbol | null $biasedTowardSymbol = null,
+        float $biasedTowardAmount = 0,
+        bool $withNoneMatching = false
+    ): array
     {
-        return [
-            $this->getTruelyRandomSlotSymbol(),
-            $this->getTruelyRandomSlotSymbol(),
-            $this->getTruelyRandomSlotSymbol(),
-            $this->getTruelyRandomSlotSymbol(),
+        $symbols = [
+            $this->getRandomSlotSymbol(
+                $biasedTowardSymbol,
+                $biasedTowardAmount,
+            ),
+            $this->getRandomSlotSymbol(
+                $biasedTowardSymbol,
+                $biasedTowardAmount,
+            ),
+            $this->getRandomSlotSymbol(
+                $biasedTowardSymbol,
+                $biasedTowardAmount,
+            ),
+            $this->getRandomSlotSymbol(
+                $biasedTowardSymbol,
+                $biasedTowardAmount,
+            ),
         ];
+
+        $symbolsAreNotUnique = count(array_unique(array_map(fn ($symbol) => $symbol->name, $symbols))) !== 4;
+        if ($withNoneMatching && $symbolsAreNotUnique) 
+            return $this->getSetOfSlotSymbols(
+                $biasedTowardSymbol,
+                $biasedTowardAmount,
+                $withNoneMatching,
+            );
+
+        return $symbols;
     }
 
-    private function getTruelyRandomSlotSymbol(): SlotSymbol
+    private function getRandomSlotSymbol(
+        SlotSymbol | null $biasedTowardSymbol = null,
+        float $biasedTowardAmount = 0,
+    ): SlotSymbol
     {
         $slotSymbols = [
             SlotSymbol::Cherry,

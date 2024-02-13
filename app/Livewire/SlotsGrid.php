@@ -20,7 +20,9 @@ class SlotsGrid extends Component
 
     private function randomizeSlotBoxSymbols() {
         $slotSymbolRepository = app(SlotSymbolRepository::class);
-        $slotSymbols = $slotSymbolRepository->getSetOfTruelyRandomSlotSymbols();
+        $slotSymbols = $slotSymbolRepository->getSetOfSlotSymbols(
+            withNoneMatching: true,
+        );
 
         $this->slotSymbolA = $slotSymbols[0];
         $this->slotSymbolB = $slotSymbols[1];
