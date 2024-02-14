@@ -3,5 +3,5 @@
 
     <livewire:slots-grid />
 
-    <livewire:slots-buttons />
+    <livewire:slots-buttons :statusMessage="$statusMessage" @spin="spin" @cashOut="cashOut" />
 </div>
