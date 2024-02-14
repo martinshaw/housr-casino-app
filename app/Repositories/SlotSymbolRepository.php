@@ -14,6 +14,21 @@ enum SlotSymbol: string {
 
 class SlotSymbolRepository
 {
+    public function convertSymbolNamesToSymbols(array $symbolNames): array 
+    {
+        return array_map(
+            fn ($symbolName) => $this->convertSymbolNameToSymbol($symbolName),
+            $symbolNames
+        );    
+    }
+
+    private function convertSymbolNameToSymbol(string $symbolName): SlotSymbol
+    {
+        foreach (SlotSymbol::cases() as $slotSymbol) {
+            if ($slotSymbol->value === $symbolName) return $slotSymbol;
+        }
+    }
+
     public function getCurrentUsersLatestSpin() : UserSlotsSpin | null
     {
         return Auth::user()->slotsSpins()->latest()->first();
@@ -22,17 +37,11 @@ class SlotSymbolRepository
     private function slotSymbolsWin(array $slotSymbols): int
     {
         $uniqueSlotSymbolsCount = count(array_unique(array_map(fn ($symbol) => $symbol->name, $slotSymbols)));
-        
         if ($uniqueSlotSymbolsCount !== 1) return 0;
 
         $slotSymbol = $slotSymbols[0];
 
-        if ($slotSymbol === SlotSymbol::Cherry) return config('casino.credit_allocation_quantity.gain_on_win_with_cherry', 0);
-        if ($slotSymbol === SlotSymbol::Lemon) return config('casino.credit_allocation_quantity.gain_on_win_with_lemon', 0);
-        if ($slotSymbol === SlotSymbol::Orange) return config('casino.credit_allocation_quantity.gain_on_win_with_orange', 0);
-        if ($slotSymbol === SlotSymbol::Watermelon) return config('casino.credit_allocation_quantity.gain_on_win_with_watermelon', 0);
-        
-        return 0;
+        return config('casino.credit_allocation_quantity.gain_on_win_with.' . $slotSymbol->name, 0);
     }
 
     public function nextSpin(): UserSlotsSpin | false
@@ -107,13 +116,7 @@ class SlotSymbolRepository
 
     private function getRandomSlotSymbol(): SlotSymbol
     {
-        $slotSymbols = [
-            SlotSymbol::Cherry,
-            SlotSymbol::Lemon,
-            SlotSymbol::Orange,
-            SlotSymbol::Watermelon,
-        ];
-
+        $slotSymbols = SlotSymbol::cases();
         return $slotSymbols[array_rand($slotSymbols)];
     }
 }

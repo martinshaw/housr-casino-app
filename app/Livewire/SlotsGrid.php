@@ -15,26 +15,19 @@ class SlotsGrid extends Component
 
     public function mount()
     {
-        $latestSpin = app(SlotSymbolRepository::class)->getCurrentUsersLatestSpin();
+        $slotSymbolRepository = app(SlotSymbolRepository::class);
+        $latestSpin = $slotSymbolRepository->getCurrentUsersLatestSpin();
         if (is_null($latestSpin)) {
             $this->randomizeSlotBoxSymbols();
             return;
         }
 
-        $this->slotSymbolA = $this->convertSymbolNameToSymbol($latestSpin->slot_symbols[0]);
-        $this->slotSymbolB = $this->convertSymbolNameToSymbol($latestSpin->slot_symbols[1]);
-        $this->slotSymbolC = $this->convertSymbolNameToSymbol($latestSpin->slot_symbols[2]);
-        $this->slotSymbolD = $this->convertSymbolNameToSymbol($latestSpin->slot_symbols[3]);
-    }
-
-    private function convertSymbolNameToSymbol(string $symbolName): SlotSymbol
-    {
-        switch ($symbolName) {
-            case '🍒': return SlotSymbol::Cherry;
-            case '🍋': return SlotSymbol::Lemon;
-            case '🍊': return SlotSymbol::Orange;
-            case '🍉': return SlotSymbol::Watermelon;
-        }
+        [
+            $this->slotSymbolA,
+            $this->slotSymbolB,
+            $this->slotSymbolC,
+            $this->slotSymbolD,
+        ] = $slotSymbolRepository->convertSymbolNamesToSymbols($latestSpin->slot_symbols);
     }
 
     private function randomizeSlotBoxSymbols() {
@@ -43,10 +36,12 @@ class SlotsGrid extends Component
             withNoneMatching: true,
         );
 
-        $this->slotSymbolA = $slotSymbols[0];
-        $this->slotSymbolB = $slotSymbols[1];
-        $this->slotSymbolC = $slotSymbols[2];
-        $this->slotSymbolD = $slotSymbols[3];
+        [
+            $this->slotSymbolA,
+            $this->slotSymbolB,
+            $this->slotSymbolC,
+            $this->slotSymbolD,
+        ] = $slotSymbols;
     }
 
     public function render()
