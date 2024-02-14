@@ -2,15 +2,9 @@
 
 namespace App\Repositories;
 
+use App\Enums\SlotSymbol;
 use App\Models\UserSlotsSpin;
 use Illuminate\Support\Facades\Auth;
-
-enum SlotSymbol: string {
-    case Cherry = '🍒';
-    case Lemon = '🍋';
-    case Orange = '🍊';
-    case Watermelon = '🍉';
-};
 
 class SlotSymbolRepository
 {

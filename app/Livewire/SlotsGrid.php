@@ -2,49 +2,52 @@
 
 namespace App\Livewire;
 
-use App\Repositories\SlotSymbol;
+use App\Enums\SlotSymbol;
 use App\Repositories\SlotSymbolRepository;
+use Illuminate\Contracts\View\View;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class SlotsGrid extends Component
 {
+    private SlotSymbolRepository $slotSymbolRepository;
+
     public SlotSymbol $slotSymbolA;
     public SlotSymbol $slotSymbolB;
     public SlotSymbol $slotSymbolC;
     public SlotSymbol $slotSymbolD;
 
-    public function mount()
+    public function __construct()
     {
-        $slotSymbolRepository = app(SlotSymbolRepository::class);
-        $latestSpin = $slotSymbolRepository->getCurrentUsersLatestSpin();
-        if (is_null($latestSpin)) {
-            $this->randomizeSlotBoxSymbols();
-            return;
-        }
+        $this->slotSymbolRepository = app(SlotSymbolRepository::class);
+    }
+
+    #[On('spin')]
+    public function onSpin(): void
+    {
+        $this->refreshLatestSpinSymbols();
+    }
+
+    public function mount(): void
+    {
+        $this->refreshLatestSpinSymbols();
+    }
+
+    private function refreshLatestSpinSymbols(): void
+    {
+        $latestSpin = $this->slotSymbolRepository->getCurrentUsersLatestSpin();
 
         [
             $this->slotSymbolA,
             $this->slotSymbolB,
             $this->slotSymbolC,
             $this->slotSymbolD,
-        ] = $slotSymbolRepository->convertSymbolNamesToSymbols($latestSpin->slot_symbols);
+        ] = is_null($latestSpin) ?
+            $this->slotSymbolRepository->getSetOfSlotSymbols(withNoneMatching: true) :
+            $this->slotSymbolRepository->convertSymbolNamesToSymbols($latestSpin->slot_symbols);
     }
 
-    private function randomizeSlotBoxSymbols() {
-        $slotSymbolRepository = app(SlotSymbolRepository::class);
-        $slotSymbols = $slotSymbolRepository->getSetOfSlotSymbols(
-            withNoneMatching: true,
-        );
-
-        [
-            $this->slotSymbolA,
-            $this->slotSymbolB,
-            $this->slotSymbolC,
-            $this->slotSymbolD,
-        ] = $slotSymbols;
-    }
-
-    public function render()
+    public function render(): View
     {
         return view('livewire.slots-grid');
     }
