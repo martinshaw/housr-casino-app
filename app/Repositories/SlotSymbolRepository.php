@@ -56,10 +56,7 @@ class SlotSymbolRepository
 
         $currentUserCreditsCount = $userCreditAllocationRepository->getCurrentUserCreditsCount();
 
-        $previousWinsCount = UserSlotsSpin::query()
-            ->where('user_id', Auth::id())
-            ->where('credits_quantity_won', '>', 0)
-            ->count();
+        $previousWinsCount = Auth::user()?->slotsSpins()?->withWinnings()?->count() ?? 0;
         
         $slotSymbols = null;
 

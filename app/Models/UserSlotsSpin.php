@@ -28,4 +28,9 @@ class UserSlotsSpin extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function scopeWithWinnings($query)
+    {
+        return $query->where('credits_quantity_won', '>', 0);
+    }
 }
