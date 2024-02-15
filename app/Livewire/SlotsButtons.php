@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\UserSlotsSpin;
+use App\Repositories\PersistentUserMigrationRepository;
 use App\Repositories\SlotSymbolRepository;
 use App\Repositories\UserCreditAllocationRepository;
 use Illuminate\Contracts\View\View;
@@ -14,6 +15,7 @@ use Illuminate\Support\Str;
 class SlotsButtons extends Component
 {
     private UserCreditAllocationRepository $userCreditAllocationRepository;
+    private PersistentUserMigrationRepository $persistentUserMigrationRepository;
     private SlotSymbolRepository $slotSymbolRepository;
 
     public int $userCreditsCount = 0;
@@ -25,6 +27,7 @@ class SlotsButtons extends Component
     public function __construct()
     {
         $this->userCreditAllocationRepository = app(UserCreditAllocationRepository::class);
+        $this->persistentUserMigrationRepository = app(PersistentUserMigrationRepository::class);
         $this->slotSymbolRepository = app(SlotSymbolRepository::class);
     }
     
@@ -115,6 +118,12 @@ class SlotsButtons extends Component
         }
     }
 
+    public function refreshSession()
+    {
+        $this->persistentUserMigrationRepository->refreshSession();
+
+        return redirect()->route('slots');
+    }
 
     public function render(): View
     {
