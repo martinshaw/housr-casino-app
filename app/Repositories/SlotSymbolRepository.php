@@ -29,7 +29,7 @@ class SlotSymbolRepository
         return Auth::user()->slotsSpins()->latest()->first();
     }
 
-    private function slotSymbolsWin(array $slotSymbols): int
+    private function determineWinningsFromSlotSymbols(array $slotSymbols): int
     {
         $uniqueSlotSymbolsCount = count(array_unique(array_map(fn ($symbol) => $symbol->name, $slotSymbols)));
         if ($uniqueSlotSymbolsCount !== 1) return 0;
@@ -37,6 +37,15 @@ class SlotSymbolRepository
         $slotSymbol = $slotSymbols[0];
 
         return config('casino.credit_allocation_quantity.gain_on_win_with.' . $slotSymbol->name, 0);
+    }
+
+    public function determineWinningSymbolFromUserSlotsSpin(UserSlotsSpin $userSlotsSpin): array | false
+    {
+        $slotSymbols = $this->convertSymbolNamesToSymbols($userSlotsSpin->slot_symbols);
+        $uniqueSlotSymbolsCount = count(array_unique(array_map(fn ($symbol) => $symbol->name, $slotSymbols)));
+        if ($uniqueSlotSymbolsCount !== 1) return false;
+
+        return [$slotSymbols[0], $this->determineWinningsFromSlotSymbols($slotSymbols)];
     }
 
     public function nextSpin(): UserSlotsSpin | false
@@ -59,16 +68,16 @@ class SlotSymbolRepository
         else if ($currentUserCreditsCount >= 40 && $currentUserCreditsCount < 60) {
             $chance = $previousWinsCount * 0.3;
             $slotSymbols = $this->getSetOfSlotSymbols(biasAgainstMatching: $chance);
-            if ($this->slotSymbolsWin($slotSymbols) > 0) $slotSymbols = $this->getSetOfSlotSymbols(biasAgainstMatching: $chance);
+            if ($this->determineWinningsFromSlotSymbols($slotSymbols) > 0) $slotSymbols = $this->getSetOfSlotSymbols(biasAgainstMatching: $chance);
         } 
         
         else if ($currentUserCreditsCount >= 60) {
             $chance = $previousWinsCount * 0.6;
             $slotSymbols = $this->getSetOfSlotSymbols(biasAgainstMatching: $chance);
-            if ($this->slotSymbolsWin($slotSymbols) > 0) $slotSymbols = $this->getSetOfSlotSymbols(biasAgainstMatching: $chance);
+            if ($this->determineWinningsFromSlotSymbols($slotSymbols) > 0) $slotSymbols = $this->getSetOfSlotSymbols(biasAgainstMatching: $chance);
         }
 
-        $creditsQuantityWon = $this->slotSymbolsWin($slotSymbols);
+        $creditsQuantityWon = $this->determineWinningsFromSlotSymbols($slotSymbols);
 
         $userSlotsSpin = Auth::user()->slotsSpins()->create([
             'slot_symbols' => $slotSymbols,

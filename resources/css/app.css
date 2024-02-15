@@ -1,3 +1,45 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/**
+ *  Animate message opacity weak to strong to weak to string to invisible
+ */
+
+@keyframes slotsButtonsMessageKeyframes {
+    0% {
+        opacity: 0.7;
+        font-weight: 400;
+    }
+    15% {
+        opacity: 1;
+        font-weight: 500;
+    }
+    30% {
+        opacity: 0.7;
+        font-weight: 400;
+    }
+    45% {
+        opacity: 1;
+        font-weight: 500;
+    }
+    60% {
+        opacity: 0.7;
+        font-weight: 400;
+    }
+    75% {
+        opacity: 1;
+        font-weight: 500;
+    }
+    100% {
+        opacity: 0.9;
+        font-weight: 400;
+    }
+}
+
+.slots .slots__buttons .slots__buttons__message {
+    animation-name: slotsButtonsMessageKeyframes;
+    animation-duration: 7s;
+    animation-fill-mode: forwards;
+    animation-delay: 500ms;
+}
