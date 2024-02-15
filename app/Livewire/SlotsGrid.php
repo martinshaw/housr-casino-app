@@ -22,8 +22,8 @@ class SlotsGrid extends Component
         $this->slotSymbolRepository = app(SlotSymbolRepository::class);
     }
 
-    #[On('spin')]
-    public function onSpin(): void
+    #[On('afterSpin')]
+    public function onAfterSpin(): void
     {
         $this->refreshLatestSpinSymbols();
     }

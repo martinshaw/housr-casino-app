@@ -5,15 +5,16 @@ namespace App\Repositories;
 use App\Enums\SlotSymbol;
 use App\Models\UserSlotsSpin;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class SlotSymbolRepository
 {
-    public function convertSymbolNamesToSymbols(array $symbolNames): array 
+    public function convertSymbolNamesToSymbols(array $symbolNames): array
     {
         return array_map(
             fn ($symbolName) => $this->convertSymbolNameToSymbol($symbolName),
             $symbolNames
-        );    
+        );
     }
 
     private function convertSymbolNameToSymbol(string $symbolName): SlotSymbol
@@ -23,7 +24,7 @@ class SlotSymbolRepository
         }
     }
 
-    public function getCurrentUsersLatestSpin() : UserSlotsSpin | null
+    public function getCurrentUsersLatestSpin(): UserSlotsSpin | null
     {
         return Auth::user()->slotsSpins()->latest()->first();
     }
@@ -51,7 +52,6 @@ class SlotSymbolRepository
         $currentUserCreditsCount = $userCreditAllocationRepository->getCurrentUserCreditsCount();
 
         $previousWinsCount = Auth::user()?->slotsSpins()?->withWinnings()?->count() ?? 0;
-        
         $slotSymbols = null;
 
         if ($currentUserCreditsCount < 40) $slotSymbols = $this->getSetOfSlotSymbols();
@@ -60,9 +60,9 @@ class SlotSymbolRepository
             $chance = $previousWinsCount * 0.3;
             $slotSymbols = $this->getSetOfSlotSymbols(biasAgainstMatching: $chance);
             if ($this->slotSymbolsWin($slotSymbols) > 0) $slotSymbols = $this->getSetOfSlotSymbols(biasAgainstMatching: $chance);
-        }
-
-        else if ($currentUserCreditsCount >= 60) {                
+        } 
+        
+        else if ($currentUserCreditsCount >= 60) {
             $chance = $previousWinsCount * 0.6;
             $slotSymbols = $this->getSetOfSlotSymbols(biasAgainstMatching: $chance);
             if ($this->slotSymbolsWin($slotSymbols) > 0) $slotSymbols = $this->getSetOfSlotSymbols(biasAgainstMatching: $chance);
@@ -84,19 +84,18 @@ class SlotSymbolRepository
     public function getSetOfSlotSymbols(
         float $biasAgainstMatching = 0,
         bool $withNoneMatching = false
-    ): array
-    {
+    ): array {
         $symbols = [
             $this->getRandomSlotSymbol(),
             $this->getRandomSlotSymbol(),
             $this->getRandomSlotSymbol(),
             $this->getRandomSlotSymbol(),
         ];
-        
+
         $chanceSymbolShouldNotMatch = mt_rand(0, 100) <= ($biasAgainstMatching * 100);
-        
+
         $symbolsAreNotUnique = count(array_unique(array_map(fn ($symbol) => $symbol->name, $symbols))) !== 4;
-        if (($withNoneMatching || $chanceSymbolShouldNotMatch) && $symbolsAreNotUnique) 
+        if (($withNoneMatching || $chanceSymbolShouldNotMatch) && $symbolsAreNotUnique)
             return $this->getSetOfSlotSymbols(
                 $biasAgainstMatching,
                 true

@@ -57,6 +57,8 @@ class SlotsButtons extends Component
             $this->statusMessage = 'You do not have enough credits to spin again.';
             return;
         }
+
+        $this->dispatch('afterSpin');
     }
 
     public function mount(): void

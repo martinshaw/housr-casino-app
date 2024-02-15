@@ -4,16 +4,22 @@ namespace App\Livewire;
 
 use App\Repositories\UserCreditAllocationRepository;
 use Illuminate\Contracts\View\View;
-use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
 class SlotsHeader extends Component
 {
+    private UserCreditAllocationRepository $userCreditAllocationRepository;
+
     public int $userCreditsCount = 0;
 
-    #[On('spin')]
-    public function onSpin(): void
+    public function __construct()
+    {
+        $this->userCreditAllocationRepository = app(UserCreditAllocationRepository::class);
+    }
+
+    #[On('afterSpin')]
+    public function onAfterSpin(): void
     {
         $this->refreshUserCreditsCount();
     }
@@ -25,7 +31,7 @@ class SlotsHeader extends Component
 
     private function refreshUserCreditsCount(): void
     {
-        $this->userCreditsCount = app(UserCreditAllocationRepository::class)->getCurrentUserCreditsCount();
+        $this->userCreditsCount = $this->userCreditAllocationRepository->getCurrentUserCreditsCount();
     }
 
     public function render(): View
