@@ -21,7 +21,7 @@
 
         <div class="flex flex-row gap-8 items-center justify-around select-none">
             <button type="button" wire:click="navigateToSlots" class="transition-all bg-stone-200 text-stone-600 hover:bg-stone-300 hover:text-stone-700 px-16 py-4 rounded-md text-lg">No, I want to keep playing!</button>
-            <button type="submit" :disabled="{{ !$this->canSubmit }}" class="transition-all bg-stone-500 text-white hover:bg-stone-600 disabled:opacity-40 px-16 py-4 rounded-md text-lg">I'm Done.</button>
+            <button type="submit" :disabled="{{ (!$this->canSubmit) ? "true" : "false" }}" class="transition-all bg-stone-500 text-white hover:bg-stone-600 disabled:opacity-40 px-16 py-4 rounded-md text-lg">I'm Done.</button>
         </div>
     </form>
 
