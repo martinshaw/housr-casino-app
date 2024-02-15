@@ -4,4 +4,8 @@
     <livewire:slots-grid />
 
     <livewire:slots-buttons  />
+
+    @if ($showCashoutModal) 
+        <livewire:slots-cashout-modal />
+    @endif
 </div>

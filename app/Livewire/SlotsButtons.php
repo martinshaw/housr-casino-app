@@ -84,8 +84,14 @@ class SlotsButtons extends Component
 
     public function mount(): void
     {
+        $this->refreshLatestSpinSymbols();
         $this->refreshCheckForSufficientCredits();
         $this->refreshCheckForWinningSpin();
+    }
+
+    private function refreshLatestSpinSymbols(): void
+    {
+        $this->latestSpin = $this->slotSymbolRepository->getCurrentUsersLatestSpin();
     }
 
     private function refreshCheckForSufficientCredits(): void
