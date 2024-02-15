@@ -53,3 +53,9 @@ Please organize, design, test and document your code as if it were going into pr
 All the best and happy coding,
 
 The Housr Team
+
+** The remaining part of the README has been added by myself (Martin Shaw) **
+
+### Video of the result
+
+You can see a video of the result [here](./Final%20Cut%20Raw.mp4)
